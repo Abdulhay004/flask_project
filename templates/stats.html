@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Statistika</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f2f5; }
+    h1 { text-align: center; margin-bottom: 30px; color: #333; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      transition: 0.3s;
+    }
+    .card:hover { transform: translateY(-5px); }
+    canvas { max-height: 260px; }
+    .stat-number { font-size: 32px; font-weight: bold; color: #2196f3; }
+    h2 { font-size: 18px; margin-bottom: 10px; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>📊 QR Statistika Paneli</h1>
+
+  <!-- Umumiy ko‘rsatkichlar -->
+  <div class="grid">
+    <div class="card">
+      <h2>Umumiy skanlar</h2>
+      <p class="stat-number">{{ stats_data["total_scans"] }}</p>
+    </div>
+    <div class="card">
+      <h2>Yangi foydalanuvchilar</h2>
+      <p class="stat-number">{{ stats_data["new_users"] }}</p>
+    </div>
+    <div class="card">
+      <h2>Takroriy foydalanuvchilar</h2>
+      <p class="stat-number">{{ stats_data["repeat_users"] }}</p>
+    </div>
+  </div>
+
+  <!-- Eng ko‘p skan qilinganlar -->
+  <div class="card" style="margin-top:30px;">
+    <h2>🔥 Eng ko‘p skan qilinganlar (Top 5)</h2>
+    <canvas id="topQrChart"></canvas>
+  </div>
+
+  <!-- Qolgan grafiklar -->
+  <div class="grid" style="margin-top:30px;">
+    <div class="card">
+      <h2>🌍 Tillar bo‘yicha</h2>
+      <canvas id="langChart"></canvas>
+    </div>
+    <div class="card">
+      <h2>📅 Oxirgi 7 kunlik skanlar</h2>
+      <canvas id="dailyChart"></canvas>
+    </div>
+    <div class="card">
+      <h2>🗓️ Oxirgi 3 oylik skanlar</h2>
+      <canvas id="monthlyChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // Top 5 QR
+    new Chart(document.getElementById('topQrChart'), {
+      type: 'bar',
+      data: {
+        labels: {{ stats_data["top_qr"]|map(attribute=0)|list|tojson }},
+        datasets: [{
+          label: 'Skanlar soni',
+          data: {{ stats_data["top_qr"]|map(attribute=1)|list|tojson }},
+          backgroundColor: '#4caf50'
+        }]
+      }
+    });
+
+    // Tillar bo‘yicha
+    new Chart(document.getElementById('langChart'), {
+      type: 'doughnut',
+      data: {
+        labels: {{ stats_data["lang_stats"].keys()|list|tojson }},
+        datasets: [{
+          data: {{ stats_data["lang_stats"].values()|list|tojson }},
+          backgroundColor: ['#4caf50','#2196f3','#ff9800','#e91e63','#9c27b0','#009688']
+        }]
+      }
+    });
+
+    // Oxirgi 7 kunlik
+    new Chart(document.getElementById('dailyChart'), {
+      type: 'line',
+      data: {
+        labels: {{ stats_data["daily"]|map(attribute="date")|list|tojson }},
+        datasets: [{
+          label: 'Kunlik skanlar',
+          data: {{ stats_data["daily"]|map(attribute="count")|list|tojson }},
+          borderColor: '#2196f3',
+          backgroundColor: 'rgba(33,150,243,0.2)',
+          fill: true,
+          tension: 0.3
+        }]
+      }
+    });
+
+    // Oxirgi 3 oy
+    new Chart(document.getElementById('monthlyChart'), {
+      type: 'bar',
+      data: {
+        labels: {{ stats_data["monthly"]|map(attribute="date")|list|tojson }},
+        datasets: [{
+          label: 'Oylik skanlar',
+          data: {{ stats_data["monthly"]|map(attribute="count")|list|tojson }},
+          backgroundColor: '#ff9800'
+        }]
+      }
+    });
+  </script>
+</body>
+  <div class="mt-4">
+    <a href="{{ url_for('branch_dashboard', branch_id=branch_id) }}"
+   class="btn btn-back text-white">
+  Orqaga qaytish
+  </a>
+  </div>
+</html>

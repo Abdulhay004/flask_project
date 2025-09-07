@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Google Fonts Montserrat -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    background: linear-gradient(135deg, #f0f9ff, #e0f7fa, #fef9f8);
+    min-height: 100vh;
+    color: #212529;
+    font-family: 'Montserrat', sans-serif;
+    padding: 20px;
+    opacity: 0;                   /* Boshlang‘ich: ko‘rinmaydi */
+    transition: opacity 0.6s ease;
+  }
+  body.page-loaded { opacity: 1; } /* Yuklanganda ko‘rinadi */
+  body.fade-out { opacity: 0; }    /* Ketayotganda yo‘qoladi */
+
+  .card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  h1, h3, h4 {
+    font-weight: 600;
+    color: #212529;
+  }
+
+  p, li {
+    color: #333333;
+    line-height: 1.6;
+  }
+
+  .list-group-item {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 15px 0;
+  }
+
+  /* Back button */
+  .btn-back {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+  .btn-back:hover {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    transform: translateY(-2px);
+  }
+</style>
+
+<div class="card shadow border-0">
+  <!-- Product Image -->
+  <div class="text-center mb-4">
+    <img src="{{ url_for('static', filename='uploads/' ~ product.image) }}"
+         class="img-fluid rounded shadow-sm border"
+         style="max-width: 300px; height: auto; border-color: aquamarine;"
+         alt="Product image">
+  </div>
+</div>
+
+<div class="card shadow border-0 p-4">
+  <!-- Name -->
+  <h3 class="font-family: 'Montserrat'" style="color: black">
+    {% if lang == 'uz' %} {{ product.name_uz }}
+    {% elif lang == 'ru' %} {{ product.name_ru }}
+    {% else %} {{ product.name_en }}
+    {% endif %}
+  </h3>
+
+  <!-- Description -->
+  {% if (lang == 'uz' and product.description_uz)
+        or (lang == 'ru' and product.description_ru)
+        or (lang == 'en' and product.description_en) %}
+  <p style="font-size: 1.05rem; color: black">
+    {% if lang == 'uz' %} {{ product.description_uz }}
+    {% elif lang == 'ru' %} {{ product.description_ru }}
+    {% else %} {{ product.description_en }}
+    {% endif %}
+  </p>
+  {% endif %}
+
+  <!-- Details -->
+  <div class="list-group list-group-flush">
+
+    <div class="list-group-item">
+      {% if lang == 'uz' and product.for_whom_uz %}
+        <strong>Kimlar uchun:</strong>
+        <ul class="mt-2">
+          {% for line in product.for_whom_uz.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      {% elif lang == 'ru' and product.for_whom_ru %}
+        <strong>для кого:</strong>
+        <ul class="mt-2">
+          {% for line in product.for_whom_ru.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      {% elif lang == 'en' and product.for_whom_en %}
+        <strong>For Whom:</strong>
+        <ul class="mt-2">
+          {% for line in product.for_whom_en.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    <div class="list-group-item">
+      {% if lang == 'uz' and product.components_uz %}
+        <strong>Asosiy faol tarkib:</strong>
+        <ul class="mt-2">
+          {% for line in product.components_uz.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      {% elif lang == 'ru' and product.components_ru %}
+        <strong>Состав:</strong>
+        <ul class="mt-2">
+          {% for line in product.components_ru.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      {% elif lang == 'en' and product.components_en %}
+        <strong>Components:</strong>
+        <ul class="mt-2">
+          {% for line in product.components_en.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    {% if lang == 'uz' and product.company_uz %}
+      <div class="list-group-item"><strong>Ishlab chiqaruvchi:</strong> {{ product.company_uz }}</div>
+    {% elif lang == 'ru' and product.company_ru %}
+      <div class="list-group-item"><strong>Производитель:</strong> {{ product.company_ru }}</div>
+    {% elif lang == 'en' and product.company_en %}
+      <div class="list-group-item"><strong>Manufacturer:</strong> {{ product.company_en }}</div>
+    {% endif %}
+
+    {% if lang == 'uz' and product.usage_uz %}
+      <div class="list-group-item">
+        <strong>Qanday ishlatiladi:</strong>
+        <ol class="mt-2">
+          {% for line in product.usage_uz.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+    {% elif lang == 'ru' and product.usage_ru %}
+      <div class="list-group-item">
+        <strong>Применение:</strong>
+        <ol class="mt-2">
+          {% for line in product.usage_ru.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+    {% elif lang == 'en' and product.usage_en %}
+      <div class="list-group-item">
+        <strong>Usage:</strong>
+        <ol class="mt-2">
+          {% for line in product.usage_en.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+    {% endif %}
+
+    {% if lang == 'uz' and product.not_usage_uz %}
+      <div class="list-group-item">
+        <strong>Ehtiyot chorasi:</strong>
+        <ul class="mt-2">
+          {% for line in product.not_usage_uz.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% elif lang == 'ru' and product.not_usage_ru %}
+      <div class="list-group-item">
+        <strong>Противопоказания:</strong>
+        <ul class="mt-2">
+          {% for line in product.not_usage_ru.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% elif lang == 'en' and product.not_usage_en %}
+      <div class="list-group-item">
+        <strong>Not for usage:</strong>
+        <ul class="mt-2">
+          {% for line in product.not_usage_en.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if lang == 'uz' and product.storage_uz %}
+      <div class="list-group-item">
+        <strong>Saqlash shartlari:</strong>
+        <p style="white-space: pre-line; color: black; font-family: 'Montserrat'" class="mt-2">{{ product.storage_uz }}</p>
+      </div>
+    {% elif lang == 'ru' and product.storage_ru %}
+      <div class="list-group-item">
+        <strong>Условия хранения:</strong>
+        <p style="white-space: pre-line; color: black; font-family: 'Montserrat'" class="mt-2">{{ product.storage_ru }}</p>
+      </div>
+    {% elif lang == 'en' and product.storage_en %}
+      <div class="list-group-item">
+        <strong>Storage:</strong>
+        <p style="white-space: pre-line; color: black; font-family: 'Montserrat'" class="mt-2">{{ product.storage_en }}</p>
+      </div>
+    {% endif %}
+
+    {% if lang == 'uz' and product.expiry_uz %}
+      <div class="list-group-item"><strong>Yaroqlilik muddati:</strong> {{ product.expiry_uz }}</div>
+    {% elif lang == 'ru' and product.expiry_ru %}
+      <div class="list-group-item"><strong>Срок годности:</strong> {{ product.expiry_ru }}</div>
+    {% elif lang == 'en' and product.expiry_en %}
+      <div class="list-group-item"><strong>Expiry:</strong> {{ product.expiry_en }}</div>
+    {% endif %}
+
+    {% if lang == 'uz' and product.certificate_uz %}
+      <div class="list-group-item">
+        <strong>Sifat kafolati:</strong>
+        <p style="white-space: pre-line; color: black; font-family: 'Montserrat'" class="mt-2">{{ product.certificate_uz }}</p>
+      </div>
+    {% elif lang == 'ru' and product.certificate_ru %}
+      <div class="list-group-item">
+        <strong>Сертификаты и стандарты:</strong>
+        <p style="white-space: pre-line; color: black; font-family: 'Montserrat'" class="mt-2">{{ product.certificate_ru }}</p>
+      </div>
+    {% elif lang == 'en' and product.certificate_en %}
+      <div class="list-group-item">
+        <strong>Certificates:</strong>
+        <p style="white-space: pre-line; color: black; font-family: 'Montserrat'" class="mt-2">{{ product.certificate_en }}</p>
+      </div>
+    {% endif %}
+
+    {% if lang == 'uz' and product.promotion_uz %}
+      <div class="list-group-item">
+        <strong>Aksiya va bonuslar:</strong>
+        <ul class="mt-2">
+          {% for line in product.promotion_uz.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% elif lang == 'ru' and product.promotion_ru %}
+      <div class="list-group-item">
+        <strong>Акции и бонусы:</strong>
+        <ul class="mt-2">
+          {% for line in product.promotion_ru.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% elif lang == 'en' and product.promotion_en %}
+      <div class="list-group-item">
+        <strong>Promotions:</strong>
+        <ul class="mt-2">
+          {% for line in product.promotion_en.splitlines() %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if lang == 'uz' and product.conclusion_uz %}
+    <div class="list-group-item"><strong>{{ product.conclusion_uz }}</strong></div>
+    {% elif lang == 'ru' and product.conclusion_ru %}
+    <div class="list-group-item"><strong>{{ product.conclusion_ru }}</strong></div>
+    {% elif lang == 'en' and product.conclusion_en %}
+    <div class="list-group-item"><strong>{{ product.conclusion_en }}</strong></div>
+    {% endif %}
+
+  </div>
+  <!-- Back Button -->
+  <div class="mt-4">
+    <a href="{{ url_for('select_language', branch_id=branch_id, product_id=product.id) }}"
+   class="btn btn-back text-white">
+  {% if lang == 'uz' %} Orqaga qaytish
+  {% elif lang == 'ru' %} Назад
+  {% else %} Back
+  {% endif %}
+  </a>
+  </div>
+</div>
+<!-- Transition Script -->
+<script>
+  // Sahifa yuklanganda fade-in
+  window.addEventListener("load", () => {
+    document.body.classList.add("page-loaded");
+  });
+
+  // Link bosilganda fade-out
+  document.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", e => {
+      const href = link.getAttribute("href");
+      if (href) {
+        e.preventDefault();
+        document.body.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = href;
+        }, 600); // animatsiya davomiyligi bilan teng
+      }
+    });
+  });
+</script>
+{% endblock %}

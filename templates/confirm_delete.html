@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-4 shadow-sm">
+  <h4>O‘chirishni tasdiqlaysizmi?</h4>
+  <p><strong>{{ product.name_uz }}</strong> (ID: {{ product.id }}) ni o‘chirmoqchisiz.</p>
+  <form method="post" class="d-flex gap-2">
+    <button class="btn btn-danger">Ha, o‘chirilsin</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('dashboard') }}">Yo‘q</a>
+  </form>
+</div>
+{% endblock %}

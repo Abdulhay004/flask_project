@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+      <i class="bi bi-buildings"></i> Filiallar
+    </h2>
+    <a href="{{ url_for('branch_add') }}" class="btn btn-success rounded-pill shadow-sm">
+      <i class="bi bi-plus-circle"></i> Filial qo‘shish
+    </a>
+  </div>
+
+  {% if branches %}
+  <div class="row g-4">
+    {% for b in branches %}
+    <div class="col-md-4 col-sm-6">
+      <div class="card shadow-lg border-0 rounded-4 h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="bi bi-shop text-primary" style="font-size:2.5rem;"></i>
+          </div>
+          <h5 class="card-title fw-bold">{{ b.name }}</h5>
+          <p class="text-muted">
+            <i class="bi bi-geo-alt"></i> {{ b.address or "Manzil kiritilmagan" }}
+          </p>
+          <a href="{{ url_for('branch_dashboard', branch_id=b.id) }}"
+             class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-box-seam"></i> Ko‘rish
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="alert alert-info text-center rounded-4 shadow-sm">
+      <i class="bi bi-info-circle"></i> Hali filial yo‘q
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

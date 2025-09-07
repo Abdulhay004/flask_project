@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4>{{ branch.name }} — Mahsulotlar</h4>
+  <a class="btn btn-success" href="{{ url_for('add_product', branch_id=branch.id) }}">+ Mahsulot qo‘shish</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nomi (UZ)</th>
+        <th>QR</th>
+        <th>Amallar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>{{ p.name_uz }}</td>
+        <td>
+          {% if p.qr_code %}
+            <img src="{{ url_for('static', filename='qrcodes/' ~ p.qr_code) }}" width="80" alt="QR">
+            <div><a target="_blank" href="{{ url_for('select_language', branch_id=branch.id, product_id=p.id) }}">Public link</a></div>
+            <div class="mt-3 text-muted">👁 Ko‘rishlar soni: {{ p.views or 0 }}</div>
+          {% else %}
+            <span class="text-muted">QR yo‘q</span>
+          {% endif %}
+        </td>
+        <td>
+          <a class="btn btn-sm btn-outline-primary"
+             href="{{ url_for('edit_product', branch_id=branch.id, product_id=p.id) }}">
+             ✏️ Tahrirlash
+          </a>
+          <a class="btn btn-sm btn-outline-danger"
+             href="{{ url_for('delete_product', branch_id=branch.id, product_id=p.id) }}"
+             onclick="return confirm('Rostdan ham o‘chirmoqchimisiz?')">
+             🗑 O‘chirish
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4" class="text-center text-muted">Mahsulot yo‘q</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="text-bottom mt-4">
+  <div class="d-flex justify-content-center gap-3 flex-wrap">
+    <a class="btn btn-outline-primary btn-lg" href="{{ url_for('branch_stats', branch_id=branch.id) }}">📈 Filial Statistikasi</a>
+    <a class="btn btn-outline-primary btn-lg" href="{{ url_for('dashboard', branch_id=branch.id) }}">Filialga qaytish</a>
+  </div>
+</div>
+{% endblock %}

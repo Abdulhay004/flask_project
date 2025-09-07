@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    body {
+      background: #0f172a;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      opacity: 0;                /* boshlanishda ko‘rinmaydi */
+      transition: opacity 0.6s ease;
+    }
+
+    body.page-loaded {
+      opacity: 1;                /* yuklanganda asta chiqadi */
+    }
+
+    body.fade-out {
+      opacity: 0;                /* ketayotganda asta yo‘qoladi */
+    }
+
+    .qr-bg {
+      position: absolute;
+      width: 300%;
+      height: 300%;
+      background-image: radial-gradient(#22d07f 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: move 20s linear infinite;
+      opacity: 0.15;
+      top: 0;
+      left: 0;
+    }
+
+    @keyframes move {
+      from { transform: translate(0,0); }
+      to   { transform: translate(-200px,-200px); }
+    }
+
+    .lang-card {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,0.06);
+      padding: 40px 50px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      width: 90%;
+      max-width: 600px;
+      margin-top: 60px;
+    }
+
+    .lang-btn {
+      display: inline-block;
+      width: auto;
+      min-width: 200px;
+      margin: 15px auto;
+      padding: 18px;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 50px;
+      border: 2px solid #22d07f;
+      color: #22d07f;
+      background: transparent;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .lang-btn:hover {
+      background: #22d07f;
+      color: #0f172a;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(34, 208, 127, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="qr-bg"></div>
+  <div class="lang-card">
+    <h2 class="mb-4">🌍 Tilni tanlang</h2>
+    <a class="lang-btn" href="{{ url_for('product_detail', branch_id=branch_id, product_id=product.id, lang='uz') }}">🇺🇿 O‘zbekcha</a>
+    <a class="lang-btn" href="{{ url_for('product_detail', branch_id=branch_id, product_id=product.id, lang='ru') }}">🇷🇺 Русский</a>
+    <a class="lang-btn" href="{{ url_for('product_detail', branch_id=branch_id, product_id=product.id, lang='en') }}">🇬🇧 English</a>
+  </div>
+
+  <script>
+    // Sahifa yuklanganda fade in
+    window.addEventListener("load", () => {
+      document.body.classList.add("page-loaded");
+    });
+
+    // Link bosilganda fade out
+    document.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        const href = link.getAttribute("href");
+        document.body.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = href;
+        }, 600); // animatsiya davomiyligi bilan teng
+      });
+    });
+  </script>
+</body>
+</html>

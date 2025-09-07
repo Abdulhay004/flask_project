@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card p-4 shadow-sm">
+      <h4 class="mb-3">Admin Login</h4>
+      {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Login</label>
+          <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Parol</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        <button class="btn btn-primary w-100">Kirish</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

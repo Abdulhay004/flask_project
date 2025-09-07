@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Yangi filial qo‘shish</h2>
+<form method="post">
+  <div class="mb-3">
+    <label>Filial nomi</label>
+    <input type="text" class="form-control" name="name" required>
+  </div>
+  <div class="mb-3">
+    <label>Manzil</label>
+    <input type="text" class="form-control" name="address">
+  </div>
+  <button type="submit" class="btn btn-success">Saqlash</button>
+</form>
+{% endblock %}

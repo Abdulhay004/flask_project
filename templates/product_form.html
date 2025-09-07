@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-4 shadow-sm">
+
+  <form method="post" enctype="multipart/form-data" action="{{ url_for('add_product', branch_id=branch.id) }}">
+
+    <!-- Rasm -->
+    <div class="mb-3">
+      <label class="form-label">Mahsulot rasmi</label>
+      <input type="file" class="form-control" name="image" required>
+    </div>
+
+    <hr>
+    <h5 class="mt-4">🇺🇿 O‘zbekcha ma’lumotlar</h5>
+    <div class="mb-3">
+      <label class="form-label">Nom (UZ)</label>
+      <input type="text" class="form-control" name="name_uz" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tavsif (UZ)</label>
+      <textarea class="form-control" name="description_uz" rows="3" required></textarea>
+    </div>
+      <div class="mb-3">
+      <label class="form-label">Kimlar uchun (UZ)</label>
+      <textarea class="form-control" name="for_whom_uz" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tarkibiy qismi (UZ)</label>
+      <textarea class="form-control" name="components_uz" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Ishlab chiqaruvchi (UZ)</label>
+      <input type="text" class="form-control" name="company_uz">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Foydalanish tartibi (UZ)</label>
+      <textarea class="form-control" name="usage_uz" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Foydalanish mumkin bo‘lmagan holatlar (UZ)</label>
+      <textarea class="form-control" name="not_usage_uz" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Saqlash shartlari (UZ)</label>
+      <textarea class="form-control" name="storage_uz" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Yaroqlilik muddati (UZ)</label>
+      <input type="text" class="form-control" name="expiry_uz">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Sertifikat va standartlar (UZ)</label>
+      <textarea class="form-control" name="certificate_uz" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Aksiya va bonuslar (UZ)</label>
+      <textarea class="form-control" name="promotion_uz" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Xulosa (UZ)</label>
+      <textarea class="form-control" name="conclusion_uz" rows="2"></textarea>
+    </div>
+
+    <hr>
+    <h5 class="mt-4">🇷🇺 Русский</h5>
+    <div class="mb-3">
+      <label class="form-label">Название (RU)</label>
+      <input type="text" class="form-control" name="name_ru" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Описание (RU)</label>
+      <textarea class="form-control" name="description_ru" rows="3" required></textarea>
+    </div>
+      <div class="mb-3">
+      <label class="form-label">для кого (Ru)</label>
+      <textarea class="form-control" name="for_whom_ru" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Состав (RU)</label>
+      <textarea class="form-control" name="components_ru" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Производитель (RU)</label>
+      <input type="text" class="form-control" name="company_ru">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Применение (RU)</label>
+      <textarea class="form-control" name="usage_ru" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Противопоказания (RU)</label>
+      <textarea class="form-control" name="not_usage_ru" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Условия хранения (RU)</label>
+      <textarea class="form-control" name="storage_ru" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Срок годности (RU)</label>
+      <input type="text" class="form-control" name="expiry_ru">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Сертификат и стандарты (RU)</label>
+<textarea class="form-control" name="certificate_ru" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Акции и бонусы (RU)</label>
+      <textarea class="form-control" name="promotion_ru" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Вывод (RU)</label>
+      <textarea class="form-control" name="conclusion_ru" rows="2"></textarea>
+    </div>
+
+    <hr>
+    <h5 class="mt-4">🇬🇧 English</h5>
+    <div class="mb-3">
+      <label class="form-label">Name (EN)</label>
+      <input type="text" class="form-control" name="name_en" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Description (EN)</label>
+      <textarea class="form-control" name="description_en" rows="3" required></textarea>
+    </div>
+      <div class="mb-3">
+      <label class="form-label">For Whom (UZ)</label>
+      <textarea class="form-control" name="for_whom_en" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Components (EN)</label>
+      <textarea class="form-control" name="components_en" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Company (EN)</label>
+      <input type="text" class="form-control" name="company_en">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Usage (EN)</label>
+      <textarea class="form-control" name="usage_en" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Not for use (EN)</label>
+      <textarea class="form-control" name="not_usage_en" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Storage (EN)</label>
+      <textarea class="form-control" name="storage_en" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Expiry (EN)</label>
+      <input type="text" class="form-control" name="expiry_en">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Certificate (EN)</label>
+      <textarea class="form-control" name="certificate_en" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Promotion (EN)</label>
+      <textarea class="form-control" name="promotion_en" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Conclusion (EN)</label>
+      <textarea class="form-control" name="conclusion_en" rows="2"></textarea>
+    </div>
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary">Saqlash</button>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Bekor qilish</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

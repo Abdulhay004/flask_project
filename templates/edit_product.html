@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Mahsulotni tahrirlash ✏️</h3>
+    <form method="POST" enctype="multipart/form-data">
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="langTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="uz-tab" data-bs-toggle="tab" href="#uz" role="tab">O'zbekcha</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" id="ru-tab" data-bs-toggle="tab" href="#ru" role="tab">Русский</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" id="en-tab" data-bs-toggle="tab" href="#en" role="tab">English</a>
+            </li>
+        </ul>
+
+        <!-- Tab contents -->
+        <div class="tab-content mt-3">
+
+            <!-- Uzbekcha -->
+            <div class="tab-pane fade show active" id="uz" role="tabpanel">
+                <div class="mb-3">
+                    <label>Nom (UZ)</label>
+                    <input type="text" class="form-control" name="name_uz" value="{{ product.name_uz }}">
+                </div>
+                <div class="mb-3">
+                    <label>Tavsif (UZ)</label>
+                    <textarea class="form-control" name="description_uz">{{ product.description_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Kimlar uchun (UZ)</label>
+                    <textarea class="form-control" name="for_whom_uz">{{ product.for_whom_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Tarkibiy qismi (UZ)</label>
+                    <textarea class="form-control" name="components_uz">{{ product.components_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Ishlab chiqaruvchi (UZ)</label>
+                    <input type="text" class="form-control" name="company_uz" value="{{ product.company_uz }}">
+                </div>
+                <div class="mb-3">
+                    <label>Foydalanish tartibi (UZ)</label>
+                    <textarea class="form-control" name="usage_uz">{{ product.usage_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Qo‘llash mumkin bo‘lmagan holatlar (UZ)</label>
+                    <textarea class="form-control" name="not_usage_uz">{{ product.not_usage_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Saqlash shartlari (UZ)</label>
+                    <textarea class="form-control" name="storage_uz">{{ product.storage_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Yaroqlilik muddati (UZ)</label>
+                    <input type="text" class="form-control" name="expiry_uz" value="{{ product.expiry_uz }}">
+                </div>
+                <div class="mb-3">
+                    <label>Sertifikat (UZ)</label>
+                    <textarea class="form-control" name="certificate_uz">{{ product.certificate_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Aksiya va bonuslar (UZ)</label>
+                    <textarea class="form-control" name="promotion_uz">{{ product.promotion_uz }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Xulosa (UZ)</label>
+                    <textarea class="form-control" name="conclusion_uz">{{ product.conclusion_uz }}</textarea>
+                </div>
+            </div>
+
+            <!-- Русский -->
+            <div class="tab-pane fade show active" id="ru" role="tabpanel">
+                <div class="mb-3">
+                    <label>Название (RU)</label>
+                    <input type="text" class="form-control" name="name_ru" value="{{ product.name_ru }}">
+                </div>
+                <div class="mb-3">
+                    <label>Описание (RU)</label>
+                    <textarea class="form-control" name="description_ru">{{ product.description_ru }}</textarea></div>
+                <div class="mb-3">
+                    <label>для кого (Ru)</label>
+                    <textarea class="form-control" name="for_whom_ru">{{ product.for_whom_ru }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Состав (RU)</label>
+                    <textarea class="form-control" name="components_ru">{{ product.components_ru }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Производитель (RU)</label>
+                    <input type="text" class="form-control" name="company_ru" value="{{ product.company_ru }}">
+                </div>
+                <div class="mb-3">
+                    <label>Способ применения (RU)</label>
+                    <textarea class="form-control" name="usage_ru">{{ product.usage_ru }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Противопоказания (RU)</label>
+                    <textarea class="form-control" name="not_usage_ru">{{ product.not_usage_ru }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Условия хранения (RU)</label>
+                    <textarea class="form-control" name="storage_ru">{{ product.storage_ru }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Срок годности (RU)</label>
+                    <input type="text" class="form-control" name="expiry_ru" value="{{ product.expiry_ru }}">
+                </div>
+                <div class="mb-3">
+                    <label>Сертификаты (RU)</label>
+                    <textarea class="form-control" name="certificate_ru">{{ product.certificate_ru }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Акции и бонусы (RU)</label>
+                    <textarea class="form-control" name="promotion_ru">{{ product.promotion_ru }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Заключение (RU)</label>
+                    <textarea class="form-control" name="conclusion_ru">{{ product.conclusion_ru }}</textarea>
+                </div>
+            </div>
+
+            <!-- English -->
+            <div class="tab-pane fade show active" id="en" role="tabpanel">
+                <div class="mb-3">
+                    <label>Name (EN)</label>
+                    <input type="text" class="form-control" name="name_en" value="{{ product.name_en }}">
+                </div>
+                <div class="mb-3">
+                    <label>Description (EN)</label>
+                    <textarea class="form-control" name="description_en">{{ product.description_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>For Whom (En)</label>
+                    <textarea class="form-control" name="for_whom_en">{{ product.for_whom_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Components (EN)</label>
+                    <textarea class="form-control" name="components_en">{{ product.components_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Manufacturer (EN)</label>
+                    <input type="text" class="form-control" name="company_en" value="{{ product.company_en }}">
+                </div>
+                <div class="mb-3">
+                    <label>Usage (EN)</label>
+                    <textarea class="form-control" name="usage_en">{{ product.usage_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Not to use (EN)</label>
+                    <textarea class="form-control" name="not_usage_en">{{ product.not_usage_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Storage (EN)</label>
+                    <textarea class="form-control" name="storage_en">{{ product.storage_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Expiry date (EN)</label>
+                    <input type="text" class="form-control" name="expiry_en" value="{{ product.expiry_en }}"></div>
+                <div class="mb-3">
+                    <label>Certificate (EN)</label>
+                    <textarea class="form-control" name="certificate_en">{{ product.certificate_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Promotions (EN)</label>
+                    <textarea class="form-control" name="promotion_en">{{ product.promotion_en }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Conclusion (EN)</label>
+                    <textarea class="form-control" name="conclusion_en">{{ product.conclusion_en }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="mb-3 mt-3">
+            <label>Mahsulot rasmi</label><br>
+            {% if product.image %}
+                <img src="{{ url_for('static', filename='uploads/' ~ product.image) }}" alt="Image" width="150" class="mb-2"><br>
+            {% endif %}
+            <input type="file" class="form-control" name="image">
+        </div>
+
+        <button type="submit" class="btn btn-success">Saqlash</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Bekor qilish</a>
+    </form>
+</div>
+{% endblock %}
