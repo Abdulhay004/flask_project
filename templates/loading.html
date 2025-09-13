@@ -40,7 +40,7 @@
     <div class="bar"><div class="fill" id="fill"></div></div>
   </div>
 
-  <script>
+<script>
     // progress animatsiya
     requestAnimationFrame(() => {
       document.getElementById('fill').style.width = '100%';
@@ -48,8 +48,8 @@
 
     // 2 soniyadan keyin yo'naltirish
     setTimeout(() => {
-      window.location.href = "/select-language/{{ product.id }}";
+      window.location.href = "{{ url_for('select_language', branch_id=branch_id, product_id=product.id) }}";
     }, 2000);
-  </script>
+</script>
 </body>
 </html>
