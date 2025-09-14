@@ -91,7 +91,7 @@ def branch_stats(branch_id):
     for l in ["uz", "ru", "en"]:
         lang_stats.setdefault(l, 0)
 
-    # Oxirgi 7 kunlik skanlar
+    # ✅ Oxirgi 7 kunlik skanlar
     today = datetime.utcnow().date()
     last_week = today - timedelta(days=7)
     daily = []
@@ -103,17 +103,18 @@ def branch_stats(branch_id):
         ).count()
         daily.append({"date": day.strftime("%Y-%m-%d"), "count": count})
 
-    # Oxirgi 3 oylik skanlar
+    # ✅ Oxirgi 3 oylik skanlar
     last_3_months = today - timedelta(days=90)
     monthly = (
         db.session.query(
-            func.strftime("%Y-%m", LanguageView.created_at), func.count(LanguageView.id)
+            func.to_char(LanguageView.created_at, 'YYYY-MM'),  # ✅ PostgreSQL uchun
+            func.count(LanguageView.id)
         )
         .filter(
             LanguageView.product_id.in_(product_ids),
             LanguageView.created_at >= last_3_months
         )
-        .group_by(func.strftime("%Y-%m", LanguageView.created_at))
+        .group_by(func.to_char(LanguageView.created_at, 'YYYY-MM'))
         .all()
     )
     monthly = [{"date": k, "count": v} for k, v in monthly]
