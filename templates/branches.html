@@ -25,9 +25,16 @@
             <i class="bi bi-geo-alt"></i> {{ b.address or "Manzil kiritilmagan" }}
           </p>
           <a href="{{ url_for('branch_dashboard', branch_id=b.id) }}"
-             class="btn btn-outline-primary rounded-pill px-4">
-            <i class="bi bi-box-seam"></i> Ko‘rish
-          </a>
+           class="btn btn-outline-primary rounded-pill px-4">
+          <i class="bi bi-box-seam"></i> Ko‘rish
+        </a>
+
+            <form action="{{ url_for('branch_delete', branch_id=b.id) }}" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-outline-danger rounded-pill px-4"
+                      onclick="return confirm('Haqiqatan ham o‘chirmoqchimisiz?');">
+                <i class="bi bi-trash"></i> O‘chirish
+              </button>
+        </form>
         </div>
       </div>
     </div>

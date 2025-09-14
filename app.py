@@ -175,6 +175,23 @@ def branch_dashboard(branch_id):
     products = Product.query.filter_by(branch_id=branch.id).all()
     return render_template("dashboard.html", branch=branch, products=products)
 
+@app.route("/branches/delete/<int:branch_id>", methods=["POST"])
+def branch_delete(branch_id):
+    branch = Branch.query.get(branch_id)
+    if not branch:
+        flash("Filial topilmadi!", "danger")
+        return redirect(url_for("branch_list"))
+
+    try:
+        db.session.delete(branch)
+        db.session.commit()
+        flash("Filial muvaffaqiyatli o‘chirildi ✅", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Xatolik yuz berdi: " + str(e), "danger")
+
+    return redirect(url_for("branch_list"))
+
 
 
 
