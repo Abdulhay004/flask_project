@@ -36,9 +36,6 @@ app.config['QR_FOLDER'] = QR_DIR
 db.init_app(app)
 app.register_blueprint(auth_bp)
 
-with app.app_context():
-    db.create_all()
-
 from flask_migrate import Migrate
 migrate = Migrate(app, db)
 
