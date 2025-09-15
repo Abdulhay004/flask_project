@@ -2,6 +2,8 @@ import os
 import time
 import uuid
 import qrcode
+import boto3
+import io
 from PIL import Image
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
@@ -19,18 +21,18 @@ from translations import translations
 load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploads')
-QR_DIR = os.path.join(BASE_DIR, 'static', 'qrcodes')
-
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(QR_DIR, exist_ok=True)
+# UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploads')
+# QR_DIR = os.path.join(BASE_DIR, 'static', 'qrcodes')
+#
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
+# os.makedirs(QR_DIR, exist_ok=True)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'secret')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///products.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = UPLOAD_DIR
-app.config['QR_FOLDER'] = QR_DIR
+# app.config['UPLOAD_FOLDER'] = UPLOAD_DIR
+# app.config['QR_FOLDER'] = QR_DIR
 
 # init db + blueprints
 db.init_app(app)
@@ -38,6 +40,30 @@ app.register_blueprint(auth_bp)
 
 from flask_migrate import Migrate
 migrate = Migrate(app, db)
+
+R2_BUCKET = os.getenv("R2_BUCKET")
+R2_ENDPOINT = os.getenv("R2_ENDPOINT")  # masalan: https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY")
+R2_SECRET_KEY = os.getenv("R2_SECRET_KEY")
+
+s3_client = boto3.client(
+    "s3",
+    endpoint_url=R2_ENDPOINT,
+    aws_access_key_id=R2_ACCESS_KEY,
+    aws_secret_access_key=R2_SECRET_KEY
+)
+
+def upload_file_to_r2(file_obj, filename, folder="uploads"):
+    """ Faylni Cloudflare R2 ga yuklash va public URL qaytarish """
+    filename = secure_filename(filename)
+    key = f"{folder}/{filename}"
+    s3_client.upload_fileobj(
+        file_obj,
+        R2_BUCKET,
+        key,
+        ExtraArgs={"ACL": "public-read"}  # fayl public bo‘lsin
+    )
+    return f"{R2_ENDPOINT}/{R2_BUCKET}/{key}"
 
 
 # -----------------------------
@@ -55,15 +81,28 @@ def _unique_filename(filename: str) -> str:
 def _check_image_ext(filename: str) -> bool:
     return os.path.splitext(filename)[1].lower() in ALLOWED_EXT
 
-
 def _generate_qr_for_product(branch_id: int, product_id: int) -> str:
-    # QR foydalanuvchini til tanlash sahifasiga olib boradi (public)
     product_url = url_for('product_entry', branch_id=branch_id, product_id=product_id, _external=True)
     img = qrcode.make(product_url)
+
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
     qr_filename = f"{product_id}.png"
-    save_path = os.path.join(app.config['QR_FOLDER'], qr_filename)
-    img.save(save_path)
-    return qr_filename
+    return upload_file_to_r2(buffer, qr_filename, "qrcodes")
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    file = request.files.get("file")
+    if not file or not _check_image_ext(file.filename):
+        return "Noto‘g‘ri fayl", 400
+
+    filename = _unique_filename(file.filename)
+    url = upload_file_to_r2(file, filename, "products")
+
+    # DB’da saqlash: product.image_url = url
+    return {"url": url}
 
 
 @app.route('/admin/branch/<int:branch_id>/stats')
@@ -103,7 +142,7 @@ def branch_stats(branch_id):
         ).count()
         daily.append({"date": day.strftime("%Y-%m-%d"), "count": count})
 
-    # ✅ Oxirgi 3 oylik skanlar
+    # ✅ Oxirgi 3 oylik skanlar.
     last_3_months = today - timedelta(days=90)
     monthly = (
         db.session.query(
