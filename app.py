@@ -82,15 +82,29 @@ def _check_image_ext(filename: str) -> bool:
     return os.path.splitext(filename)[1].lower() in ALLOWED_EXT
 
 def _generate_qr_for_product(branch_id: int, product_id: int) -> str:
-    product_url = url_for('product_entry', branch_id=branch_id, product_id=product_id, _external=True)
+    # Mahsulot uchun URL yasash
+    product_url = url_for(
+        'product_entry',
+        branch_id=branch_id,
+        product_id=product_id,
+        _external=True
+    )
+
+    # QR kod yaratish
     img = qrcode.make(product_url)
 
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     buffer.seek(0)
 
+    # Fayl nomi
     qr_filename = f"{product_id}.png"
-    return upload_file_to_r2(buffer, qr_filename, "qrcodes")
+
+    # R2 ga yuklash
+    upload_file_to_r2(buffer, qr_filename, "qrcodes")
+
+    # 🔹 Yuklangan faylning to‘liq URL manzilini qaytaramiz
+    return f"{os.getenv('R2_PUBLIC_URL')}/qrcodes/{qr_filename}"
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -311,6 +325,9 @@ def add_product(branch_id):
 
         filename = _unique_filename(file.filename)
 
+        # Faylni o‘qib olish (bir marta)
+        file_bytes = file.read()
+
         # 📌 Faylni R2 ga yuklash
         s3 = boto3.client(
             "s3",
@@ -320,11 +337,14 @@ def add_product(branch_id):
         )
 
         s3.upload_fileobj(
-            Fileobj=io.BytesIO(file.read()),   # faylni xotiradan yuklaydi
+            Fileobj=io.BytesIO(file_bytes),
             Bucket=os.getenv("R2_BUCKET"),
-            Key=f"uploads/{filename}",         # bucket ichida qayerga yoziladi
+            Key=f"uploads/{filename}",
             ExtraArgs={"ContentType": file.content_type}
         )
+
+        # 🔹 Fayl manzilini DB ga yozib qo‘yasiz
+        image_url = f"{os.getenv('R2_PUBLIC_URL')}/uploads/{filename}"
 
         product = Product(
             branch_id=branch.id,
@@ -377,7 +397,7 @@ def add_product(branch_id):
             conclusion_ru=request.form.get('conclusion_ru', ''),
             conclusion_en=request.form.get('conclusion_en', ''),
 
-            image=filename
+            image=image_url
         )
         db.session.add(product)
         db.session.commit()
