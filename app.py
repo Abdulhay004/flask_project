@@ -53,17 +53,19 @@ s3_client = boto3.client(
     aws_secret_access_key=R2_SECRET_KEY
 )
 
-def upload_file_to_r2(file_obj, filename, folder="uploads"):
-    """ Faylni Cloudflare R2 ga yuklash va public URL qaytarish """
+def upload_file_to_r2(file_obj, filename, folder="uploads", content_type="application/octet-stream"):
     filename = secure_filename(filename)
     key = f"{folder}/{filename}"
+
     s3_client.upload_fileobj(
         file_obj,
         R2_BUCKET,
         key,
-        ExtraArgs={"ACL": "public-read"}  # fayl public bo‘lsin
+        ExtraArgs={"ContentType": content_type}
     )
-    return f"{R2_ENDPOINT}/{R2_BUCKET}/{key}"
+
+    # 🔹 To‘liq public URL qaytaradi
+    return f"{os.getenv('R2_PUBLIC_URL')}/{key}"
 
 
 # -----------------------------
@@ -82,7 +84,6 @@ def _check_image_ext(filename: str) -> bool:
     return os.path.splitext(filename)[1].lower() in ALLOWED_EXT
 
 def _generate_qr_for_product(branch_id: int, product_id: int) -> str:
-    # Mahsulot uchun URL yasash
     product_url = url_for(
         'product_entry',
         branch_id=branch_id,
@@ -90,21 +91,16 @@ def _generate_qr_for_product(branch_id: int, product_id: int) -> str:
         _external=True
     )
 
-    # QR kod yaratish
     img = qrcode.make(product_url)
 
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     buffer.seek(0)
 
-    # Fayl nomi
     qr_filename = f"{product_id}.png"
 
-    # R2 ga yuklash
-    upload_file_to_r2(buffer, qr_filename, "qrcodes")
-
-    # 🔹 Yuklangan faylning to‘liq URL manzilini qaytaramiz
-    return f"{os.getenv('R2_PUBLIC_URL')}/qrcodes/{qr_filename}"
+    # ✅ Endi to‘liq URL qaytaradi
+    return upload_file_to_r2(buffer, qr_filename, "qrcodes", content_type="image/png")
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -118,6 +114,16 @@ def upload():
     # DB’da saqlash: product.image_url = url
     return {"url": url}
 
+@app.route("/debug/products")
+def debug_products():
+    products = Product.query.all()
+    return {
+        p.id: {
+            "image": p.image,
+            "qr_code": p.qr_code
+        }
+        for p in products
+    }
 
 @app.route('/admin/branch/<int:branch_id>/stats')
 @admin_required
@@ -476,38 +482,40 @@ def edit_product(branch_id, product_id):
         product.conclusion_ru = request.form.get('conclusion_ru')
         product.conclusion_en = request.form.get('conclusion_en')
 
-    # R2 client yaratamiz
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
-        aws_access_key_id=os.getenv("R2_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("R2_SECRET_KEY"),
-    )
-
-    # 📌 Rasm
-    image_file = request.files.get('image')
-    if image_file and image_file.filename != '':
-        filename = _unique_filename(image_file.filename)
-        s3.upload_fileobj(
-            Fileobj=io.BytesIO(image_file.read()),
-            Bucket=os.getenv("R2_BUCKET"),
-            Key=f"uploads/{filename}",   # bucket ichida papka nomi
-            ExtraArgs={"ContentType": image_file.content_type}
+        # R2 client
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
+            aws_access_key_id=os.getenv("R2_ACCESS_KEY"),
+            aws_secret_access_key=os.getenv("R2_SECRET_KEY"),
         )
-        product.image = filename  # faqat nomini DB ga yozamiz
 
-    # 📌 QR Code
-    qr_file = request.files.get('qr_code')
-    if qr_file and qr_file.filename != '':
-        filename = _unique_filename(qr_file.filename)
-        s3.upload_fileobj(
-            Fileobj=io.BytesIO(qr_file.read()),
-            Bucket=os.getenv("R2_BUCKET"),
-            Key=f"qrcodes/{filename}",
-            ExtraArgs={"ContentType": qr_file.content_type}
-        )
-        product.qr_code = filename
+        # 📌 Rasm
+        image_file = request.files.get('image')
+        if image_file and image_file.filename != '':
+            filename = _unique_filename(image_file.filename)
+            s3.upload_fileobj(
+                Fileobj=io.BytesIO(image_file.read()),
+                Bucket=os.getenv("R2_BUCKET"),
+                Key=f"uploads/{filename}",
+                ExtraArgs={"ContentType": image_file.content_type}
+            )
+            # 🔹 URL ni DB ga yozamiz
+            product.image = f"{os.getenv('R2_PUBLIC_URL')}/uploads/{filename}"
 
+        # 📌 QR Code
+        qr_file = request.files.get('qr_code')
+        if qr_file and qr_file.filename != '':
+            filename = _unique_filename(qr_file.filename)
+            s3.upload_fileobj(
+                Fileobj=io.BytesIO(qr_file.read()),
+                Bucket=os.getenv("R2_BUCKET"),
+                Key=f"qrcodes/{filename}",
+                ExtraArgs={"ContentType": qr_file.content_type}
+            )
+            product.qr_code = f"{os.getenv('R2_PUBLIC_URL')}/qrcodes/{filename}"
+
+        # ✅ Endi commit va redirect har doim ishlaydi
         db.session.commit()
         flash("Mahsulot muvaffaqiyatli tahrirlandi ✏️", "success")
         return redirect(url_for("dashboard", branch_id=branch.id))
@@ -522,34 +530,16 @@ def delete_product(branch_id, product_id):
     product = Product.query.get_or_404(product_id)
 
     if request.method == 'POST':
-        s3 = boto3.client(
-            "s3",
-            endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
-            aws_access_key_id=os.getenv("R2_ACCESS_KEY"),
-            aws_secret_access_key=os.getenv("R2_SECRET_KEY"),
-        )
-
-        try:
-            # 📌 Eski rasmni R2 dan o‘chirish
-            if product.image:
-                s3.delete_object(
-                    Bucket=os.getenv("R2_BUCKET"),
-                    Key=f"uploads/{product.image}"
-                )
-
-            # 📌 Eski QR kodni R2 dan o‘chirish
-            if product.qr_code:
-                s3.delete_object(
-                    Bucket=os.getenv("R2_BUCKET"),
-                    Key=f"qrcodes/{product.qr_code}"
-                )
-        except Exception as e:
-            print(f"Faylni o‘chirishda xato: {e}")
+        # Bog‘liq yozuvlarni o‘chirish
+        LanguageView.query.filter_by(product_id=product.id).delete()
         db.session.delete(product)
         db.session.commit()
-        flash("Mahsulot muvaffaqiyatli o‘chirildi 🗑️", "success")
+
+        flash("Mahsulot muvaffaqiyatli o‘chirildi ✅", "success")
         return redirect(url_for("dashboard", branch_id=branch.id))
-    return render_template('confirm_delete.html', product=product)
+
+    # GET bo‘lsa tasdiqlash sahifasi chiqadi
+    return render_template("confirm_delete.html", branch=branch, product=product)
 
 
 import os
