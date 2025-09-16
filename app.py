@@ -304,11 +304,27 @@ def add_product(branch_id):
         if not file or file.filename.strip() == '':
             flash('Rasm yuklash majburiy', 'danger')
             return render_template('product_form.html', mode='add')
+
         if not _check_image_ext(file.filename):
             flash('Rasm turi noto‘g‘ri (png/jpg/jpeg/webp).', 'danger')
             return render_template('product_form.html', mode='add')
+
         filename = _unique_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        # 📌 Faylni R2 ga yuklash
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
+            aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+        )
+
+        s3.upload_fileobj(
+            Fileobj=io.BytesIO(file.read()),   # faylni xotiradan yuklaydi
+            Bucket=os.getenv("R2_BUCKET_NAME"),
+            Key=f"uploads/{filename}",         # bucket ichida qayerga yoziladi
+            ExtraArgs={"ContentType": file.content_type}
+        )
 
         product = Product(
             branch_id=branch.id,
@@ -440,21 +456,37 @@ def edit_product(branch_id, product_id):
         product.conclusion_ru = request.form.get('conclusion_ru')
         product.conclusion_en = request.form.get('conclusion_en')
 
-        # Rasm
-        image_file = request.files.get('image')
-        if image_file and image_file.filename != '':
-            filename = secure_filename(image_file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(filepath)
-            product.image = filename
+    # R2 client yaratamiz
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
+        aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+    )
 
-        # QR Code
-        qr_file = request.files.get('qr_code')
-        if qr_file and qr_file.filename != '':
-            filename = secure_filename(qr_file.filename)
-            filepath = os.path.join(app.config['QR_FOLDER'], filename)
-            qr_file.save(filepath)
-            product.qr_code = filename
+    # 📌 Rasm
+    image_file = request.files.get('image')
+    if image_file and image_file.filename != '':
+        filename = _unique_filename(image_file.filename)
+        s3.upload_fileobj(
+            Fileobj=io.BytesIO(image_file.read()),
+            Bucket=os.getenv("R2_BUCKET_NAME"),
+            Key=f"uploads/{filename}",   # bucket ichida papka nomi
+            ExtraArgs={"ContentType": image_file.content_type}
+        )
+        product.image = filename  # faqat nomini DB ga yozamiz
+
+    # 📌 QR Code
+    qr_file = request.files.get('qr_code')
+    if qr_file and qr_file.filename != '':
+        filename = _unique_filename(qr_file.filename)
+        s3.upload_fileobj(
+            Fileobj=io.BytesIO(qr_file.read()),
+            Bucket=os.getenv("R2_BUCKET_NAME"),
+            Key=f"qrcodes/{filename}",
+            ExtraArgs={"ContentType": qr_file.content_type}
+        )
+        product.qr_code = filename
 
         db.session.commit()
         flash("Mahsulot muvaffaqiyatli tahrirlandi ✏️", "success")
@@ -468,19 +500,31 @@ def edit_product(branch_id, product_id):
 def delete_product(branch_id, product_id):
     branch = Branch.query.get_or_404(branch_id)
     product = Product.query.get_or_404(product_id)
+
     if request.method == 'POST':
-        # Optional: eski rasm/qr fayllarni o‘chirish
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
+            aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+        )
+
         try:
+            # 📌 Eski rasmni R2 dan o‘chirish
             if product.image:
-                p = os.path.join(app.config['UPLOAD_FOLDER'], product.image)
-                if os.path.exists(p):
-                    os.remove(p)
+                s3.delete_object(
+                    Bucket=os.getenv("R2_BUCKET_NAME"),
+                    Key=f"uploads/{product.image}"
+                )
+
+            # 📌 Eski QR kodni R2 dan o‘chirish
             if product.qr_code:
-                q = os.path.join(app.config['QR_FOLDER'], product.qr_code)
-                if os.path.exists(q):
-                    os.remove(q)
-        except Exception:
-            pass
+                s3.delete_object(
+                    Bucket=os.getenv("R2_BUCKET_NAME"),
+                    Key=f"qrcodes/{product.qr_code}"
+                )
+        except Exception as e:
+            print(f"Faylni o‘chirishda xato: {e}")
         db.session.delete(product)
         db.session.commit()
         flash("Mahsulot muvaffaqiyatli o‘chirildi 🗑️", "success")
