@@ -315,13 +315,13 @@ def add_product(branch_id):
         s3 = boto3.client(
             "s3",
             endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
-            aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+            aws_access_key_id=os.getenv("R2_ACCESS_KEY"),
+            aws_secret_access_key=os.getenv("R2_SECRET_KEY"),
         )
 
         s3.upload_fileobj(
             Fileobj=io.BytesIO(file.read()),   # faylni xotiradan yuklaydi
-            Bucket=os.getenv("R2_BUCKET_NAME"),
+            Bucket=os.getenv("R2_BUCKET"),
             Key=f"uploads/{filename}",         # bucket ichida qayerga yoziladi
             ExtraArgs={"ContentType": file.content_type}
         )
@@ -460,8 +460,8 @@ def edit_product(branch_id, product_id):
     s3 = boto3.client(
         "s3",
         endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
-        aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+        aws_access_key_id=os.getenv("R2_ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("R2_SECRET_KEY"),
     )
 
     # 📌 Rasm
@@ -470,7 +470,7 @@ def edit_product(branch_id, product_id):
         filename = _unique_filename(image_file.filename)
         s3.upload_fileobj(
             Fileobj=io.BytesIO(image_file.read()),
-            Bucket=os.getenv("R2_BUCKET_NAME"),
+            Bucket=os.getenv("R2_BUCKET"),
             Key=f"uploads/{filename}",   # bucket ichida papka nomi
             ExtraArgs={"ContentType": image_file.content_type}
         )
@@ -482,7 +482,7 @@ def edit_product(branch_id, product_id):
         filename = _unique_filename(qr_file.filename)
         s3.upload_fileobj(
             Fileobj=io.BytesIO(qr_file.read()),
-            Bucket=os.getenv("R2_BUCKET_NAME"),
+            Bucket=os.getenv("R2_BUCKET"),
             Key=f"qrcodes/{filename}",
             ExtraArgs={"ContentType": qr_file.content_type}
         )
@@ -505,22 +505,22 @@ def delete_product(branch_id, product_id):
         s3 = boto3.client(
             "s3",
             endpoint_url=f"https://{os.getenv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
-            aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+            aws_access_key_id=os.getenv("R2_ACCESS_KEY"),
+            aws_secret_access_key=os.getenv("R2_SECRET_KEY"),
         )
 
         try:
             # 📌 Eski rasmni R2 dan o‘chirish
             if product.image:
                 s3.delete_object(
-                    Bucket=os.getenv("R2_BUCKET_NAME"),
+                    Bucket=os.getenv("R2_BUCKET"),
                     Key=f"uploads/{product.image}"
                 )
 
             # 📌 Eski QR kodni R2 dan o‘chirish
             if product.qr_code:
                 s3.delete_object(
-                    Bucket=os.getenv("R2_BUCKET_NAME"),
+                    Bucket=os.getenv("R2_BUCKET"),
                     Key=f"qrcodes/{product.qr_code}"
                 )
         except Exception as e:
